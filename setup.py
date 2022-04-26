@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(name='HistogramGMM',
       version='0.0.1',
-      description='',
+      description='Implementation of HistogramGaussianMixture model based on sklearn GaussianMixture API.',
       url='https://github.com/orisenbazuru/histogram_gmm',
       packages=['hgmm'],
       python_requires='>=3.6.0',

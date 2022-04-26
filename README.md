@@ -26,4 +26,4 @@ The `HistogramGaussianMixture` has the same `API` of the `GaussianMixture` class
 
 ### Notebooks
 
-Example of how to run `HistogramGaussianMixture` on count (i.e. histogram-based) data is found in `notebooks` folder (see `cfdna_data.ipynb`)
+Example for how to run `HistogramGaussianMixture` on count (i.e. histogram-based) data is found in the `notebooks` folder (see `cfdna_data.ipynb`)
