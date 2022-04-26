@@ -4,7 +4,7 @@ Histogram-based Gaussian Mixture Model.
 
 This package updates the `GaussianMixture` model implementation in `sklearn`  to support grouped input (i.e. histogram-like) data.
 
-The input matrix `X` is of shape `(namples, nfeatures+1)` where the last column represents the counts of the observed unique samples.
+The input matrix `X` is of shape `(nsamples, nfeatures+1)` where the last column represents the counts of the observed unique samples.
 
 
 """
