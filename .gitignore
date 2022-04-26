@@ -127,3 +127,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+
+# orisenbazuru
+data
+notebooks
+.DS_Store
