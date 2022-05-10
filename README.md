@@ -18,11 +18,11 @@ hgmm = HistogramGaussianMixture(n_components=2, fixed_means=False, random_state=
     array([[ 1.        ,  2.36363636],
            [10.        ,  1.77142857]])
 >>> hgmm.covariances_
-    array([[[1.000000e-06, 0.000000e+00],
-            [0.000000e+00, 2.049601e+00]],
+    array([[[1.00000000e-06, 3.58573139e-32],
+            [3.58573139e-32, 2.04958778e+00]],
 
-           [[1.000000e-06, 0.000000e+00],
-            [0.000000e+00, 2.920001e+00]]])
+           [[1.00000000e-06, 0.00000000e+00],
+            [0.00000000e+00, 2.91918467e+00]]])
 >>> hgmm.predict([[0, 0, 1], [12, 3, 1]])
     array([1, 0])
 
@@ -39,7 +39,7 @@ from hgmm.histogram_gmm import HistogramGaussianMixture
 X = np.array([[1, 2, 5], [1, 4, 4], [1, 0, 2], [10, 2,9], [10, 4,11], [10, 0,15]])
 hgmm = HistogramGaussianMixture(n_components=2,
                                 random_state=42,
-                                means_init = np.array([[1],[10]]]), # means of shape (n_components, n_features)
+                                means_init = np.array([[1., 2.36],[10., 1.8]]), # means of shape (n_components, n_features)
                                 fixed_means=True, # to fix the means during learning (it will be equal to means_init)
                                 covariance_type = 'full').fit(X)
 
