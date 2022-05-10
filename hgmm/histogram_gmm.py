@@ -276,7 +276,7 @@ def _estimate_gaussian_covariances_spherical(resp, X, nk, means, reg_covar):
     return _estimate_gaussian_covariances_diag(resp, X, nk, means, reg_covar).mean(1)
 
 
-def _estimate_gaussian_parameters(X, resp, reg_covar, covariance_type):
+def _estimate_gaussian_parameters(X, resp, reg_covar, covariance_type, fixed_means=None):
     """Estimate the Gaussian distribution parameters.
 
     Parameters
@@ -292,6 +292,9 @@ def _estimate_gaussian_parameters(X, resp, reg_covar, covariance_type):
 
     covariance_type : {'full', 'tied', 'diag', 'spherical'}
         The type of precision matrices.
+    
+    fixed_means:  None or array-like of shape (n_components, n_features)
+        The means of each components.
 
     Returns
     -------
@@ -317,7 +320,11 @@ def _estimate_gaussian_parameters(X, resp, reg_covar, covariance_type):
     # print('resp.shape:', resp.shape)
     Xf = X[:,:-1]
     nk = resp.sum(axis=0) + 10 * np.finfo(resp.dtype).eps
-    means = np.dot(resp.T, Xf) / nk[:, np.newaxis]
+
+    if fixed_means is None:
+        means = np.dot(resp.T, Xf) / nk[:, np.newaxis]
+    else:
+        means = fixed_means
 
     # print('nk.shape:', nk.shape)
     # print('means.shape:', means.shape)
@@ -586,6 +593,9 @@ class HistogramGaussianMixture(BaseMixture):
 
     verbose_interval : int, default=10
         Number of iteration done before the next print.
+    
+    fixed_means; boolean, default=False
+        use `means_init` as fixed means and estimate only coveriance matrix
 
     Attributes
     ----------
@@ -688,6 +698,7 @@ class HistogramGaussianMixture(BaseMixture):
         warm_start=False,
         verbose=0,
         verbose_interval=10,
+        fixed_means=False,
     ):
         super().__init__(
             n_components=n_components,
@@ -706,6 +717,8 @@ class HistogramGaussianMixture(BaseMixture):
         self.weights_init = weights_init
         self.means_init = means_init
         self.precisions_init = precisions_init
+        # to support fixing the means
+        self.fixed_means = fixed_means
 
     def _check_parameters(self, X):
         """Check the Gaussian mixture parameters are well defined."""
@@ -746,6 +759,8 @@ class HistogramGaussianMixture(BaseMixture):
 
         resp : array-like of shape (n_samples, n_components)
         """
+
+        # this method is executed after the call of _initialize in the BaseClass
         # n_samples, _ = X.shape
         
         # print('=== _initialize ===')
@@ -754,14 +769,16 @@ class HistogramGaussianMixture(BaseMixture):
         n_samples = X[:, -1].sum()
         # print('n_samples:', n_samples)
 
-        
-        
+        fixed_means = self._get_fixed_means_variable()
+            
         weights, means, covariances = _estimate_gaussian_parameters(
-            X, resp, self.reg_covar, self.covariance_type
+            X, resp, self.reg_covar, self.covariance_type, fixed_means=fixed_means
         )
-        weights /= n_samples
 
+        # compute average across samples (weights returned as sum of resp matrix)
+        weights /= n_samples
         self.weights_ = weights if self.weights_init is None else self.weights_init
+
         self.means_ = means if self.means_init is None else self.means_init
 
         if self.precisions_init is None:
@@ -783,6 +800,16 @@ class HistogramGaussianMixture(BaseMixture):
         else:
             self.precisions_cholesky_ = np.sqrt(self.precisions_init)
 
+    def _get_fixed_means_variable(self):
+        if self.fixed_means:
+            if self.means_init is None:
+                raise ValueError("To use 'fixed means', the 'means_init' argument has to be initialzied as a matrix with shape (n_components,n_features)")
+            else:
+                fixed_means = self.means_init
+        else:
+            fixed_means = None
+        return fixed_means
+
     def _m_step(self, X, log_resp):
         """M step.
 
@@ -799,10 +826,14 @@ class HistogramGaussianMixture(BaseMixture):
         # count of sample occurence in the dataset
         n_samples = X[:, -1].sum()
         
+        fixed_means = self._get_fixed_means_variable()
+
+
         self.weights_, self.means_, self.covariances_ = _estimate_gaussian_parameters(
-            X, np.exp(log_resp), self.reg_covar, self.covariance_type
+            X, np.exp(log_resp), self.reg_covar, self.covariance_type, fixed_means=fixed_means
         )
         self.weights_ /= n_samples
+
         self.precisions_cholesky_ = _compute_precision_cholesky(
             self.covariances_, self.covariance_type
         )
@@ -835,8 +866,8 @@ class HistogramGaussianMixture(BaseMixture):
         ) = params
 
         # Attributes computation
-        _, n_features = self.means_.shape
-
+        # _, n_features = self.means_.shape
+        
         if self.covariance_type == "full":
             self.precisions_ = np.empty(self.precisions_cholesky_.shape)
             for k, prec_chol in enumerate(self.precisions_cholesky_):
@@ -861,6 +892,11 @@ class HistogramGaussianMixture(BaseMixture):
         elif self.covariance_type == "spherical":
             cov_params = self.n_components
         mean_params = n_features * self.n_components
+
+        # given that we are not estimating the means and holding them fixed
+        # removing their count in the number of parameters is valid decision
+        if self.fixed_means:
+            mean_params = 0 
         return int(cov_params + mean_params + self.n_components - 1)
 
     def bic(self, X):
