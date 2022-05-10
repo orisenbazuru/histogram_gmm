@@ -18,9 +18,9 @@ def print_model_parameters(model_type, model):
     print()
     print('~'*15)
     print('model_type:', model_type)
-    print('gmm.covariances_:\n', model.covariances_)
-    print('gmm.means_:\n', model.means_)
-    print('gmm.weights_:\n', model.weights_)
+    print(f'{model_type}.covariances_:\n', model.covariances_)
+    print(f'{model_type}.means_:\n', model.means_)
+    print(f'{model_type}.weights_:\n', model.weights_)
     print('~'*15)
     print()
 

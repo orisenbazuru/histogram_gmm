@@ -896,7 +896,7 @@ class HistogramGaussianMixture(BaseMixture):
         # given that we are not estimating the means and holding them fixed
         # removing their count in the number of parameters is valid decision
         if self.fixed_means:
-            mean_params = 0 
+            mean_params = 0.
         return int(cov_params + mean_params + self.n_components - 1)
 
     def bic(self, X):
