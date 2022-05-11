@@ -4,6 +4,7 @@ This package updates the `GaussianMixture`  model implementation in `sklearn`  t
 
 The input matrix `X` is of shape `(nsamples, nfeatures+1)` where the last column represents the counts of the observed unique samples.
 
+
 ### Example 
 
 ```python
@@ -15,14 +16,19 @@ X = np.array([[1, 2, 5], [1, 4, 4], [1, 0, 2], [10, 2,9], [10, 4,11], [10, 0,15]
 hgmm = HistogramGaussianMixture(n_components=2, random_state=42).fit(X)
 
 >>> hgmm.means_
-    array([[10.        ,  1.77142857],
-           [ 1.        ,  2.36363636]])
+    array([[ 1.        ,  2.36363636],
+           [10.        ,  1.77142857]])
+>>> hgmm.covariances_
+    array([[[1.00000000e-06, 3.58573139e-32],
+            [3.58573139e-32, 2.04958778e+00]],
+
+           [[1.00000000e-06, 0.00000000e+00],
+            [0.00000000e+00, 2.91918467e+00]]])
 >>> hgmm.predict([[0, 0, 1], [12, 3, 1]])
     array([1, 0])
-
-
 ```
-The `HistogramGaussianMixture` has the same `API` as the `GaussianMixture` class in sklearn (see [here](https://scikit-learn.org/stable/modules/generated/sklearn.mixture.GaussianMixture.html) for further info).
+
+The `HistogramGaussianMixture` has the same `API` as the `GaussianMixture` class in `sklearn` (see [here](https://scikit-learn.org/stable/modules/generated/sklearn.mixture.GaussianMixture.html) for further info).
 
 ### Notebooks
 

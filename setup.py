@@ -8,7 +8,7 @@ setup(name='HistogramGMM',
       python_requires='>=3.6.0',
       install_requires=[
             'numpy',
-            'pandas',
+            'pandas>=1.1.0',
             'scipy',
             'scikit-learn',
             'matplotlib'
